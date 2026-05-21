@@ -2,7 +2,6 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -29,7 +28,12 @@ impl Graph for UndirectedGraph {
         &self.adjacency_table
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        let u = edge.0.to_string();
+        let v = edge.1.to_string();
+        let u_adj = self.adjacency_table.entry(u.clone()).or_default();
+        u_adj.push((v.clone(), edge.2));
+        let v_adj = self.adjacency_table.entry(v).or_default();
+        v_adj.push((u, edge.2));
     }
 }
 pub trait Graph {
@@ -37,11 +41,26 @@ pub trait Graph {
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
-        //TODO
-		true
+        let node_str = node.to_string();
+        if self.adjacency_table().contains_key(&node_str) {
+            false
+        } else {
+            self.adjacency_table_mutable().insert(node_str, Vec::new());
+            true
+        }
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        let u = edge.0.to_string();
+        let v = edge.1.to_string();
+        let weight = edge.2;
+        self.add_node(edge.0);
+        self.add_node(edge.1);
+        if let Some(neighbors) = self.adjacency_table_mutable().get_mut(&u) {
+            neighbors.push((v.clone(), weight));
+        }
+        if let Some(neighbors) = self.adjacency_table_mutable().get_mut(&v) {
+            neighbors.push((u, weight));
+        }
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
